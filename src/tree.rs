@@ -1,6 +1,9 @@
 //Huffman tree
 use std::{
+    cmp::Ordering,
+    cmp::Ordering::Equal,
     collections::{BinaryHeap, HashMap},
+    fmt::Display,
     fs,
 };
 
@@ -10,42 +13,71 @@ pub struct Node {
     right: Option<Box<Node>>,
 
     val: Option<char>,
-    freq: Option<usize>,
+    freq: usize,
 }
 
 impl Node {
-    pub fn new_node(val: char, freq: usize) -> Self {
+    pub fn new_node(val: Option<char>, freq: usize) -> Self {
         Self {
             left: None,
             right: None,
 
-            val: Some(val),
-            freq: Some(freq),
+            val,
+            freq,
+        }
+    }
+
+    pub fn new_parent(left: Self, right: Self) -> Self {
+        let freq = left.freq + right.freq;
+        Self {
+            left: Some(Box::new(left)),
+            right: Some(Box::new(right)),
+
+            val: None,
+            freq,
+        }
+    }
+
+    pub fn is_leaf(&self) -> bool {
+        match (&self.left, &self.right) {
+            (None, None) => true,
+            _ => false,
         }
     }
 }
 
 impl PartialEq for Node {
     fn eq(&self, other: &Self) -> bool {
-        self.freq.unwrap() == other.freq.unwrap()
+        self.freq == other.freq
     }
 }
 
 impl PartialOrd for Node {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        if let (Some(f1), Some(f2)) = (self.freq, other.freq) {
-            Some(f1.cmp(&f2))
-        } else {
-            None
-        }
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.freq.cmp(&other.freq))
     }
 }
 
 impl Eq for Node {}
 
 impl Ord for Node {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.freq.cmp(&other.freq)
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self.freq.cmp(&other.freq) {
+            Equal => {
+                if let (Some(v1), Some(v2)) = (self.val, other.val) {
+                    v1.cmp(&v2)
+                } else {
+                    Equal
+                }
+            }
+            other => other,
+        }
+    }
+}
+
+impl Display for Node {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Node: {} {}", self.val.unwrap(), self.freq)
     }
 }
 
@@ -68,7 +100,7 @@ impl NodeArray {
         }
 
         for (k, v) in freq.iter() {
-            let n = Node::new_node(*k, *v);
+            let n = Node::new_node(Some(*k), *v);
             nodes.push(n);
         }
 

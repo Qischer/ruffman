@@ -22,6 +22,9 @@ fn print_usage() {
 //Implement -p
 fn print_huffman(src: &str) {
     println!("Print huffman tree from {src}");
+
+    let node = tree::Node::new_node(None, 1);
+    println!("{node}");
 }
 
 //Implement -pc
