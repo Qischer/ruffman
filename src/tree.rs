@@ -1,13 +1,16 @@
 //Huffman tree
-use std::{collections::HashMap, fs};
+use std::{
+    collections::{BinaryHeap, HashMap},
+    fs,
+};
 
 #[derive(Debug)]
 pub struct Node {
     left: Option<Box<Node>>,
     right: Option<Box<Node>>,
 
-    val: char,
-    freq: usize,
+    val: Option<char>,
+    freq: Option<usize>,
 }
 
 impl Node {
@@ -16,9 +19,33 @@ impl Node {
             left: None,
             right: None,
 
-            val,
-            freq,
+            val: Some(val),
+            freq: Some(freq),
         }
+    }
+}
+
+impl PartialEq for Node {
+    fn eq(&self, other: &Self) -> bool {
+        self.freq.unwrap() == other.freq.unwrap()
+    }
+}
+
+impl PartialOrd for Node {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        if let (Some(f1), Some(f2)) = (self.freq, other.freq) {
+            Some(f1.cmp(&f2))
+        } else {
+            None
+        }
+    }
+}
+
+impl Eq for Node {}
+
+impl Ord for Node {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.freq.cmp(&other.freq)
     }
 }
 
@@ -41,15 +68,26 @@ impl NodeArray {
         }
 
         for (k, v) in freq.iter() {
-            println!("key: {k} - value: {v}");
             let n = Node::new_node(*k, *v);
             nodes.push(n);
         }
+
+        nodes.sort();
 
         Self {
             n_char: nodes.len(),
             capacity: 256,
             nodes,
+        }
+    }
+
+    pub fn build_huffman_tree(&self) -> Self {
+        let mut heap = BinaryHeap::new();
+
+        Self {
+            n_char: 0,
+            capacity: 256,
+            nodes: heap.into_vec(),
         }
     }
 }
