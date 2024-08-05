@@ -7,7 +7,6 @@ use std::{
     fs,
 };
 
-#[derive(Debug)]
 pub struct Node {
     left: Option<Box<Node>>,
     right: Option<Box<Node>>,
@@ -39,10 +38,7 @@ impl Node {
     }
 
     pub fn is_leaf(&self) -> bool {
-        match (&self.left, &self.right) {
-            (None, None) => true,
-            _ => false,
-        }
+        matches!((&self.left, &self.right), (None, None))
     }
 }
 
@@ -77,14 +73,14 @@ impl Ord for Node {
 
 impl Display for Node {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Node: {} {}", self.val.unwrap(), self.freq)
+        match self.val {
+            None => write!(f, "Non-leaf Node: {}", self.freq),
+            Some(val) => write!(f, "Leaf Node--val:{} freq:{}", val , self.freq)
+        }
     }
 }
 
-#[derive(Debug)]
 pub struct NodeArray {
-    n_char: usize,
-    capacity: usize,
     nodes: Vec<Node>,
 }
 
@@ -107,19 +103,35 @@ impl NodeArray {
         nodes.sort();
 
         Self {
-            n_char: nodes.len(),
-            capacity: 256,
             nodes,
         }
     }
 
-    pub fn build_huffman_tree(&self) -> Self {
+    pub fn build_huffman_tree(&self) {
         let mut heap = BinaryHeap::new();
 
-        Self {
-            n_char: 0,
-            capacity: 256,
-            nodes: heap.into_vec(),
+        heap.push(self.nodes[0]);
+        for n in self.nodes[1..] {
+            //create a parent node
+            let parent = Node::new_node(None, heap.peek().unwrap().freq + n.freq);
+
+            heap.push(parent);
+            heap.push(n);
         }
+
+        for e in heap.iter() {
+            println!("{e}");
+        }
+     }
+}
+
+impl Display for NodeArray {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        assert_ne!(self.nodes.len(), 0); 
+        for node in &self.nodes {
+            writeln!(f, "{}", node)?;
+        }
+
+        Ok(())
     }
 }
