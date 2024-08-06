@@ -23,8 +23,14 @@ fn print_usage() {
 fn print_huffman(src: &str) {
     println!("Print huffman tree from {src}");
 
-    let node = tree::Node::new_node(None, 1);
-    println!("{node}");
+    let n1 = tree::Node::new_node(Some('w'), 1);
+    let n2 = tree::Node::new_node(Some('d'), 1);
+
+    match n1.cmp(&n2) {
+        std::cmp::Ordering::Less => println!("less"),
+        std::cmp::Ordering::Greater => println!("greater"),
+        std::cmp::Ordering::Equal => println!("equal"),
+    }
 }
 
 //Implement -pc

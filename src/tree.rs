@@ -1,11 +1,5 @@
 //Huffman tree
-use std::{
-    cmp::Ordering,
-    cmp::Ordering::Equal,
-    collections::{BinaryHeap, HashMap},
-    fmt::Display,
-    fs,
-};
+use std::{cmp::Ordering, cmp::Ordering::Equal, collections::HashMap, fmt::Display, fs};
 
 pub struct Node {
     left: Option<Box<Node>>,
@@ -50,7 +44,16 @@ impl PartialEq for Node {
 
 impl PartialOrd for Node {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.freq.cmp(&other.freq))
+        match self.freq.cmp(&other.freq) {
+            Equal => {
+                if let (Some(v1), Some(v2)) = (self.val, other.val) {
+                    Some(v1.cmp(&v2))
+                } else {
+                    Some(Equal)
+                }
+            }
+            other => Some(other),
+        }
     }
 }
 
@@ -75,7 +78,7 @@ impl Display for Node {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self.val {
             None => write!(f, "Non-leaf Node: {}", self.freq),
-            Some(val) => write!(f, "Leaf Node--val:{} freq:{}", val , self.freq)
+            Some(val) => write!(f, "Leaf Node--val:{} freq:{}", val, self.freq),
         }
     }
 }
@@ -102,32 +105,25 @@ impl NodeArray {
 
         nodes.sort();
 
-        Self {
-            nodes,
-        }
+        Self { nodes }
     }
 
-    pub fn build_huffman_tree(&self) {
-        let mut heap = BinaryHeap::new();
+    pub fn build_huffman_tree(&self) {}
 
-        heap.push(self.nodes[0]);
-        for n in self.nodes[1..] {
-            //create a parent node
-            let parent = Node::new_node(None, heap.peek().unwrap().freq + n.freq);
-
-            heap.push(parent);
-            heap.push(n);
+    fn select_children(&self, n1: &<'_> Node, n2: &Node) -> (&Node, &Node) {
+        if self.nodes.len() <= 0 {
+            return (n1, n2);
         }
+        let t1 = &self.nodes.last().unwrap();
+        let t2 = &self.nodes.last().unwrap();
 
-        for e in heap.iter() {
-            println!("{e}");
-        }
-     }
+        (t1, t2)
+    }
 }
 
 impl Display for NodeArray {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        assert_ne!(self.nodes.len(), 0); 
+        assert_ne!(self.nodes.len(), 0);
         for node in &self.nodes {
             writeln!(f, "{}", node)?;
         }
