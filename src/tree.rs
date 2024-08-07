@@ -1,5 +1,11 @@
 //Huffman tree
-use std::{cmp::Ordering, cmp::Ordering::Equal, collections::HashMap, fmt::Display, fs};
+use std::{
+    cmp::Ordering::Equal,
+    cmp::{Ordering, Reverse},
+    collections::{BinaryHeap, HashMap},
+    fmt::Display,
+    fs,
+};
 
 pub struct Node {
     left: Option<Box<Node>>,
@@ -9,8 +15,8 @@ pub struct Node {
     freq: usize,
 }
 
-impl Node {
-    pub fn new_node(val: Option<char>, freq: usize) -> Self {
+impl Node<'_> {
+    pub fn new_node() -> Self {
         Self {
             left: None,
             right: None,
@@ -20,11 +26,11 @@ impl Node {
         }
     }
 
-    pub fn new_parent(left: Self, right: Self) -> Self {
-        let freq = left.freq + right.freq;
-        Self {
-            left: Some(Box::new(left)),
-            right: Some(Box::new(right)),
+    pub fn new_parent<'a>(left: &'a Node<'a>, right: &'a Node<'a>) -> Node<'a> {
+        let freq = &left.freq + &right.freq;
+        Node {
+            left: Some(left),
+            right: Some(right),
 
             val: None,
             freq,
@@ -36,13 +42,13 @@ impl Node {
     }
 }
 
-impl PartialEq for Node {
+impl PartialEq for Node<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.freq == other.freq
     }
 }
 
-impl PartialOrd for Node {
+impl PartialOrd for Node<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match self.freq.cmp(&other.freq) {
             Equal => {
@@ -57,9 +63,9 @@ impl PartialOrd for Node {
     }
 }
 
-impl Eq for Node {}
+impl Eq for Node<'_> {}
 
-impl Ord for Node {
+impl Ord for Node<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
         match self.freq.cmp(&other.freq) {
             Equal => {
@@ -74,7 +80,7 @@ impl Ord for Node {
     }
 }
 
-impl Display for Node {
+impl Display for Node<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self.val {
             None => write!(f, "Non-leaf Node: {}", self.freq),
@@ -83,16 +89,20 @@ impl Display for Node {
     }
 }
 
-pub struct NodeArray {
-    nodes: Vec<Node>,
+pub struct NodeArray<'a> {
+    nodes: Vec<Node<'a>>,
+    parents: Vec<Node<'a>>,
 }
 
-impl NodeArray {
+impl NodeArray<'_> {
     pub fn new_from_file(src: &str, freq: &mut HashMap<char, usize>) -> Self {
         //file IO
         let binding = fs::read_to_string(src).unwrap();
         let content = binding.chars();
-        let mut nodes: Vec<Node> = vec![];
+
+        let (mut nodes, mut parents) = (vec![], vec![]);
+
+        let mut heap = BinaryHeap::new();
 
         for c in content {
             freq.entry(c).and_modify(|count| *count += 1).or_insert(1);
@@ -100,28 +110,26 @@ impl NodeArray {
 
         for (k, v) in freq.iter() {
             let n = Node::new_node(Some(*k), *v);
-            nodes.push(n);
+            heap.push(Reverse(n));
         }
 
-        nodes.sort();
+        let mut _c1: Node;
+        let mut _c2: Node;
 
-        Self { nodes }
+        let p: &i8;
+        let x = 6;
+
+        p = &x;
+
+        println!("{p}");
+
+        Self { nodes, parents }
     }
 
-    pub fn build_huffman_tree(&self) {}
-
-    fn select_children(&self, n1: &<'_> Node, n2: &Node) -> (&Node, &Node) {
-        if self.nodes.len() <= 0 {
-            return (n1, n2);
-        }
-        let t1 = &self.nodes.last().unwrap();
-        let t2 = &self.nodes.last().unwrap();
-
-        (t1, t2)
-    }
+    pub fn build_huffman_tree<'a>(&'a mut self) {}
 }
 
-impl Display for NodeArray {
+impl Display for NodeArray<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         assert_ne!(self.nodes.len(), 0);
         for node in &self.nodes {

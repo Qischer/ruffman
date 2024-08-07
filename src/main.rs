@@ -23,14 +23,8 @@ fn print_usage() {
 fn print_huffman(src: &str) {
     println!("Print huffman tree from {src}");
 
-    let n1 = tree::Node::new_node(Some('w'), 1);
-    let n2 = tree::Node::new_node(Some('d'), 1);
-
-    match n1.cmp(&n2) {
-        std::cmp::Ordering::Less => println!("less"),
-        std::cmp::Ordering::Greater => println!("greater"),
-        std::cmp::Ordering::Equal => println!("equal"),
-    }
+    let mut freq = HashMap::new();
+    let n_arr = tree::NodeArray::new_from_file(src, &mut freq);
 }
 
 //Implement -pc
@@ -39,8 +33,6 @@ fn print_huffman_encoded(src: &str) {
 
     let mut freq = HashMap::new();
     let n_arr = tree::NodeArray::new_from_file(src, &mut freq);
-
-    n_arr.build_huffman_tree();
 }
 
 //Implement -pn
