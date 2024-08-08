@@ -91,6 +91,7 @@ impl Display for Node {
 
 pub struct Huffman {
     root: Option<Box<Node>>,
+    dict: Option<HashMap<char, String>>,
 }
 
 impl Huffman {
@@ -124,39 +125,53 @@ impl Huffman {
 
         Self {
             root: Some(Box::new(root)),
+            dict: None,
         }
     }
 
-    pub fn translate(&self) {
+    pub fn get_dict(&self) -> Option<HashMap<char, String>> {
+        self.dict.clone()
+    }
+
+    pub fn translate(&mut self) {
         let code = String::new();
+        let mut dict = HashMap::<char, String>::new();
+
         match &self.root {
             None => return,
-            Some(node) => Self::translate_helper(node, &code),
+            Some(node) => Self::translate_helper(node, &code, &mut dict),
         }
+
+        self.dict = Some(dict)
     }
 
-    fn translate_helper(node: &Box<Node>, code: &str) {
+    fn translate_helper(node: &Box<Node>, code: &str, dict: &mut HashMap<char, String>) {
         if node.is_leaf() {
-            println!("{} : {}", node.val.unwrap(), code);
+            dict.insert(node.val.unwrap(), code.to_owned());
         }
 
         if let Some(left) = &node.left {
             let left_code = String::from(code.to_owned() + "0");
-            Self::translate_helper(&left, &left_code);
+            Self::translate_helper(&left, &left_code, dict);
         }
 
         if let Some(right) = &node.right {
             let right_code = String::from(code.to_owned() + "1");
-            Self::translate_helper(&right, &right_code);
+            Self::translate_helper(&right, &right_code, dict);
         }
     }
 }
 
 impl Display for Huffman {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &self.root {
+        match &self.dict {
             None => write!(f, "Huffman tree is Empty"),
-            Some(a) => write!(f, "{}", a),
+            Some(d) => {
+                for (k, v) in d.iter() {
+                    write!(f, "{k}: {v}\n")?
+                }
+                Ok(())
+            }
         }
     }
 }

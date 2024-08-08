@@ -23,8 +23,10 @@ fn print_usage() {
 fn print_huffman(src: &str) {
     println!("Print huffman tree from {src}");
 
-    let huf = tree::Huffman::new_from_file(src);
+    let mut huf = tree::Huffman::new_from_file(src);
     huf.translate();
+
+    println!("{huf}");
 }
 
 //Implement -pc
@@ -47,7 +49,11 @@ fn print_node_array(src: &str) {
 
 //Implement -e
 fn encode(src: &str, dest: &str) {
-    println!("Encode {src} into {dest}")
+    println!("Encode {src} into {dest}");
+
+    let c = char::from_u32(1000000000).unwrap();
+
+    println!("{c}");
 }
 
 //Implement -ep
