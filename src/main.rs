@@ -23,8 +23,8 @@ fn print_usage() {
 fn print_huffman(src: &str) {
     println!("Print huffman tree from {src}");
 
-    let mut freq = HashMap::new();
-    let n_arr = tree::NodeArray::new_from_file(src, &mut freq);
+    let huf = tree::Huffman::new_from_file(src);
+    huf.translate();
 }
 
 //Implement -pc
@@ -32,7 +32,7 @@ fn print_huffman_encoded(src: &str) {
     println!("Print huffman tree from encoded file {src}");
 
     let mut freq = HashMap::new();
-    let n_arr = tree::NodeArray::new_from_file(src, &mut freq);
+    let _n_arr = tree::NodeArray::new_from_file(src, &mut freq);
 }
 
 //Implement -pn
