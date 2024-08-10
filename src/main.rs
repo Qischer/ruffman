@@ -51,9 +51,12 @@ fn print_node_array(src: &str) {
 fn encode(src: &str, dest: &str) {
     println!("Encode {src} into {dest}");
 
-    let c = char::from_u32(1000000000).unwrap();
+    let mut huf = tree::Huffman::new_from_file(src);
+    huf.translate();
 
-    println!("{c}");
+    let dict = huf.get_dict().unwrap();
+
+    let _ = encode::to_file(src, dest, &dict);
 }
 
 //Implement -ep

@@ -11,12 +11,12 @@ pub struct Node {
     left: Option<Box<Node>>,
     right: Option<Box<Node>>,
 
-    val: Option<char>,
+    val: char,
     freq: usize,
 }
 
 impl Node {
-    pub fn new_node(val: Option<char>, freq: usize) -> Self {
+    pub fn new_node(val: char, freq: usize) -> Self {
         Self {
             left: None,
             right: None,
@@ -28,11 +28,12 @@ impl Node {
 
     pub fn new_parent(left: Node, right: Node) -> Self {
         let freq = &left.freq + &right.freq;
+        let val = std::cmp::min(&left.val, &right.val).clone();
         Self {
             left: Some(Box::new(left)),
             right: Some(Box::new(right)),
 
-            val: None,
+            val,
             freq,
         }
     }
@@ -51,13 +52,7 @@ impl PartialEq for Node {
 impl PartialOrd for Node {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match self.freq.cmp(&other.freq) {
-            Equal => {
-                if let (Some(v1), Some(v2)) = (self.val, other.val) {
-                    Some(v1.cmp(&v2))
-                } else {
-                    Some(Equal)
-                }
-            }
+            Equal => Some(self.val.cmp(&other.val)),
             other => Some(other),
         }
     }
@@ -68,13 +63,7 @@ impl Eq for Node {}
 impl Ord for Node {
     fn cmp(&self, other: &Self) -> Ordering {
         match self.freq.cmp(&other.freq) {
-            Equal => {
-                if let (Some(v1), Some(v2)) = (self.val, other.val) {
-                    v1.cmp(&v2)
-                } else {
-                    Equal
-                }
-            }
+            Equal => self.val.cmp(&other.val),
             other => other,
         }
     }
@@ -82,10 +71,7 @@ impl Ord for Node {
 
 impl Display for Node {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self.val {
-            None => write!(f, "Non-leaf Node: {}", self.freq),
-            Some(val) => write!(f, "Leaf Node--val:{} freq:{}", val, self.freq),
-        }
+        write!(f, "Leaf Node--val:{} freq:{}", self.val, self.freq)
     }
 }
 
@@ -108,7 +94,7 @@ impl Huffman {
         }
 
         for (k, v) in freq.iter() {
-            let n = Node::new_node(Some(*k), *v);
+            let n = Node::new_node(*k, *v);
             heap.push(Reverse(n));
         }
 
@@ -147,7 +133,7 @@ impl Huffman {
 
     fn translate_helper(node: &Box<Node>, code: &str, dict: &mut HashMap<char, String>) {
         if node.is_leaf() {
-            dict.insert(node.val.unwrap(), code.to_owned());
+            dict.insert(node.val, code.to_owned());
         }
 
         if let Some(left) = &node.left {
@@ -193,7 +179,7 @@ impl NodeArray {
         }
 
         for (k, v) in freq.iter() {
-            let n = Node::new_node(Some(*k), *v);
+            let n = Node::new_node(*k, *v);
             nodes.push(n);
         }
 
