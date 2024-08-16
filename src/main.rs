@@ -56,7 +56,13 @@ fn encode(src: &str, dest: &str) {
 
     let dict = huf.get_dict().unwrap();
 
-    let _ = encode::to_file(src, dest, &dict);
+    let mut encoder = encode::Encoder::new();
+    let res = encoder.to_file(src, dest, &dict);
+
+    match res {
+        Ok(_) => println!("Successfully compressed!"),
+        Err(e) => println!("Something went wrong. Error: {e:?}"),
+    }
 }
 
 //Implement -ep
