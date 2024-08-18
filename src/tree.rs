@@ -7,6 +7,7 @@ use std::{
     fs,
 };
 
+#[derive(Debug)]
 pub struct Node {
     left: Option<Box<Node>>,
     right: Option<Box<Node>>,
@@ -75,9 +76,11 @@ impl Display for Node {
     }
 }
 
+#[derive(Debug)]
 pub struct Huffman {
     root: Option<Box<Node>>,
     dict: Option<HashMap<char, String>>,
+    freq: Option<HashMap<char, usize>>,
 }
 
 impl Huffman {
@@ -112,11 +115,16 @@ impl Huffman {
         Self {
             root: Some(Box::new(root)),
             dict: None,
+            freq: Some(freq),
         }
     }
 
+    pub fn get_freq(&self) -> Option<HashMap<char, usize>> {
+        self.freq.to_owned()
+    }
+
     pub fn get_dict(&self) -> Option<HashMap<char, String>> {
-        self.dict.clone()
+        self.dict.to_owned()
     }
 
     pub fn translate(&mut self) {
@@ -159,43 +167,5 @@ impl Display for Huffman {
                 Ok(())
             }
         }
-    }
-}
-
-pub struct NodeArray {
-    nodes: Vec<Node>,
-}
-
-impl NodeArray {
-    pub fn new_from_file(src: &str, freq: &mut HashMap<char, usize>) -> Self {
-        //file IO
-        let binding = fs::read_to_string(src).unwrap();
-        let content = binding.chars();
-
-        let mut nodes = vec![];
-
-        for c in content {
-            freq.entry(c).and_modify(|count| *count += 1).or_insert(1);
-        }
-
-        for (k, v) in freq.iter() {
-            let n = Node::new_node(*k, *v);
-            nodes.push(n);
-        }
-
-        Self { nodes }
-    }
-
-    pub fn build_huffman_tree<'a>(&'a mut self) {}
-}
-
-impl Display for NodeArray {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        assert_ne!(self.nodes.len(), 0);
-        for node in &self.nodes {
-            writeln!(f, "{}", node)?;
-        }
-
-        Ok(())
     }
 }

@@ -1,10 +1,9 @@
 //Rust Huffman Encoding
-use std::{collections::HashMap, env, process};
+use std::{env, io::prelude::*, process};
 
 mod decode;
 mod encode;
 mod tree;
-
 fn print_usage() {
     println!("Usage: ruffman [mode] [arguments]");
     println!("-p\t[src]\t: Print huffman tree of file");
@@ -32,19 +31,18 @@ fn print_huffman(src: &str) {
 //Implement -pc
 fn print_huffman_encoded(src: &str) {
     println!("Print huffman tree from encoded file {src}");
-
-    let mut freq = HashMap::new();
-    let _n_arr = tree::NodeArray::new_from_file(src, &mut freq);
 }
 
 //Implement -pn
 fn print_node_array(src: &str) {
     println!("Print node array from {src}");
 
-    let mut freq = HashMap::new();
-    let n_arr = tree::NodeArray::new_from_file(src, &mut freq);
+    let huf = tree::Huffman::new_from_file(src);
+    let freq = huf.get_freq().unwrap();
 
-    println!("{n_arr}");
+    for (k, v) in freq.iter() {
+        println!("{k}: {v}");
+    }
 }
 
 //Implement -e
@@ -55,10 +53,13 @@ fn encode(src: &str, dest: &str) {
     huf.translate();
 
     let dict = huf.get_dict().unwrap();
+    let freq = huf.get_freq().unwrap();
 
-    let mut encoder = encode::Encoder::new();
-    let res = encoder.to_file(src, dest, &dict);
+    let mut encoder = encode::Encoder::default();
+    let res = encoder.to_file(src, dest, &dict, &freq);
 
+    let n = freq.len();
+    println!("Unique characters: {:?}", n);
     match res {
         Ok(_) => println!("Successfully compressed!"),
         Err(e) => println!("Something went wrong. Error: {e:?}"),
@@ -72,7 +73,15 @@ fn encode_and_print(src: &str, dest: &str) {
 
 //Implement -d
 fn decode(src: &str, dest: &str) {
-    println!("Decode {src} into {dest}")
+    println!("Decode {src} into {dest}");
+
+    let decoder = decode::Decoder::default();
+    let res = decoder.from_file(src);
+
+    match res {
+        Ok(_) => println!("Successfully decoded!"),
+        Err(e) => println!("Something went wrong. Error: {e:?}"),
+    }
 }
 
 //Implement -dp
